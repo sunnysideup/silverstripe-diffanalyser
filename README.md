@@ -55,7 +55,3 @@ For example, we can write tests for this module.
 ## Author
 
 Sunny Side Up Ltd.
-
-## Looking for Silverstripe Modules?
-
-To find other modules, please visit [ssmods.com](https://ssmods.com/).
