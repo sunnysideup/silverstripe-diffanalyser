@@ -1,8 +1,8 @@
 # Git commit diff analyser
 
-[![Build Status](https://travis-ci.org/sunnysideup/silverstripe-diffanalyser.svg?branch=master)](https://travis-ci.org/sunnysideup/silverstripe-diffanalyser)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/sunnysideup/silverstripe-diffanalyser/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/sunnysideup/silverstripe-diffanalyser/?branch=master)
-[![codecov.io](https://codecov.io/github/sunnysideup/silverstripe-diffanalyser/coverage.svg?branch=master)](https://codecov.io/github/sunnysideup/silverstripe-diffanalyser?branch=master)
+[![Build Status](https://travis-ci.org/sunnysideup/diffanalyser.svg?branch=master)](https://travis-ci.org/sunnysideup/diffanalyser)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/sunnysideup/diffanalyser/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/sunnysideup/diffanalyser/?branch=master)
+[![codecov.io](https://codecov.io/github/sunnysideup/diffanalyser/coverage.svg?branch=master)](https://codecov.io/github/sunnysideup/diffanalyser?branch=master)
 
 [![Latest Stable Version](https://poser.pugx.org/sunnysideup/diffanalyser/version)](https://packagist.org/packages/sunnysideup/diffanalyser)
 [![License](https://poser.pugx.org/sunnysideup/diffanalyser/license)](https://packagist.org/packages/sunnysideup/diffanalyser)
@@ -10,9 +10,9 @@
 
 ## Documentation
 
--   [Developer Docs](docs/en/INDEX.md)
--   [User Guide](docs/en/userguide.md)
--   [API Docs](http://docs.ssmods.com/sunnysideup/diffanalyser/classes.xhtml)
+- [Developer Docs](docs/en/INDEX.md)
+- [User Guide](docs/en/userguide.md)
+- [API Docs](http://docs.ssmods.com/sunnysideup/diffanalyser/classes.xhtml)
 
 ## Requirements
 
