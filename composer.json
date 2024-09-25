@@ -1,7 +1,6 @@
 {
     "name": "sunnysideup/diffanalyser",
     "description": "Go through your git commits and analyse the changes per day.",
-    "type": "vendormodule",
     "keywords": [
         "git",
         "commit",
