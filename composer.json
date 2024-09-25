@@ -1,0 +1,52 @@
+{
+  "name": "sunnysideup/diffanalyser",
+  "description": "A FooBar for Silverstripe CMS modules.",
+  "type": "silverstripe-vendormodule",
+  "keywords": [
+    "git",
+    "commit",
+    "summary",
+    "diff",
+    "daily",
+    "per day",
+    "changes",
+    "analysis",
+    "analyser"
+  ],
+  "license": "BSD-3-Clause",
+  "require": {
+    "silverstripe/framework": "^5.0",
+    "silverstripe/admin": "^2.0"
+  },
+  "require-dev": {
+    "sunnysideup/sswebpack_engine_only": "dev-master",
+    "silverleague/ideannotator": "*",
+    "phpunit/phpunit": "^9.6",
+    "squizlabs/php_codesniffer": "^3.7",
+    "silverstripe/standards": "^1",
+    "phpstan/extension-installer": "^1.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Sunnysideup\\DiffAnalyser\\": "src/"
+    }
+  },
+  "extra": {
+    "expose": [
+      "client/dist"
+    ]
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "bin": [
+    "bin/npm-build-diffanalyser.sh",
+    "bin/npm-watch-diffanalyser.sh"
+  ],
+  "authors": [
+    {
+      "name": "Nicolaas Thiemen Francken",
+      "email": "modules@sunnysideup.co.nz",
+      "role": "lead developer"
+    }
+  ]
+}
