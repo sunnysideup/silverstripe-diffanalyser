@@ -15,7 +15,7 @@ class GitDiffAnalyser
     protected string $filter = '';
     protected float $instantiationCostInMinutes = 10;
     protected float $minutesForFirstLineChange = 3;
-    protected float $decreaseFactor = 0.98;
+    protected float $decreaseFactor = 0.99;
     protected int $verbosity = 2;
     protected bool $showFullDiff = false;
     protected int $maxLinesToShowAll = 15;
@@ -359,13 +359,12 @@ class GitDiffAnalyser
         preg_match_all('#diff --git a/(' . preg_quote($fileName, '#') . ')#', $diffOutput, $matches);
         $files = $matches[1];
         $totalChanges = 0;
-        $data = [];
         if (!empty($files)) {
             foreach ($files as $file) {
                 // Extract changes for each individual file
                 $fileDiff = $this->extractFileDiff($diffOutput, $file);
-                $linesAdded = substr_count($fileDiff, "\n+");
-                $linesRemoved = substr_count($fileDiff, "\n-");
+                $linesAdded = substr_count($fileDiff, "\n+ ");
+                $linesRemoved = substr_count($fileDiff, "\n- ");
 
                 // Get just the file name without the full path
                 $fileName = basename($file);
@@ -376,15 +375,11 @@ class GitDiffAnalyser
                     $totalChanges += $fileChanges;
 
                     // Print the result in the desired format
-                    $data[] = "$fileName: $fileChanges changes";
+                    $this->output("$fileName: $fileChanges changes", 5, 2);
                 }
-            }
-        }
-        if ($totalChanges > 0) {
-            $this->output("$fileName: $totalChanges changes", 5, 2);
-            $this->output($data, 0, 3);
-            if ($this->showFullDiff) {
-                $this->output($this->extractDiffInfo($diffOutput), 0, 0);
+                if ($this->showFullDiff) {
+                    $this->output($this->extractDiffInfo($fileDiff), 0, 0);
+                }
             }
         }
         return $totalChanges;
@@ -430,14 +425,16 @@ class GitDiffAnalyser
     protected function outputEffort(string $name, int $numberOfChanges, ?int $headerLevel = 3, ?int $verbosityLevel = null)
     {
         // Convert total changes to time in minutes and hours
-        $timeInMinutes = $this->instantiationCostInMinutes;
+        $timeInMinutes = $numberOfChanges > 0 ? $this->instantiationCostInMinutes : 0;
 
         for ($i = 0; $i < $numberOfChanges; $i++) {
-            $timeInMinutes += $this->minutesForFirstLineChange * pow($this->decreaseFactor, $i);
+            $timeInMinutes += $this->minutesForFirstLineChange * (1 / (1 + log($i + 1))) * $this->decreaseFactor;
         }
 
         $hours = floor($timeInMinutes / 60);
         $minutes = round($timeInMinutes % 60);
+        $timeInDecimals = $timeInMinutes / 60;
+        $timeInDecimals = round($timeInDecimals * 4) / 4;
         if ($hours > 0) {
             $time = "$hours hours and $minutes minutes";
         } else {
@@ -451,7 +448,7 @@ class GitDiffAnalyser
             $verbosityLevel
         );
         $this->output($numberOfChanges .' (changes)', 0, $verbosityLevel);
-        $this->output($time .' (estimated time)', 0, $verbosityLevel);
+        $this->output($time .' (estimated time - '.$timeInDecimals.' rounded decimal hours)', 0, $verbosityLevel);
     }
 
     protected function outputDebug(string|array $message, $headerLevel = 0, ?int $verbosityLevel = null)
