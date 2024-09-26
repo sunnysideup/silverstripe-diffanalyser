@@ -13,15 +13,18 @@ class GitDiffAnalyser
     protected int|null $days = 1;
     protected string $branch = 'develop';
     protected string $filter = '';
-    protected float $minutesForFirstLineChange = 3;
     protected float $instantiationCostInMinutes = 10;
+    protected float $minutesForFirstLineChange = 3;
+    protected float $decreaseFactor = 0.98;
     protected int $verbosity = 2;
     protected bool $showFullDiff = false;
+    protected int $maxLinesToShowAll = 15;
+    protected int $maxLinesToShowAdditionsOnly = 55;
+    protected int $maxNumberOfKeywords = 15;
     protected string|null $currentDir = null;
     protected array $branchesToCheck = ['develop', 'main', 'master'];
 
     protected $totalChangesPerDayPerRepo = [];
-    protected float $decreaseFactor = 0.9;
 
     protected $fileTypes = [
         ['extension' => '\.php', 'type' => 'PHP'],
@@ -246,19 +249,30 @@ class GitDiffAnalyser
 
         $hasChanges = false;
 
-        $commitMessagesArray = [];
-        $commitMessages = $this->getCommitMessages($startOfDayCommit, $endOfDayCommit);
-        if (!empty($commitMessages)) {
-            foreach ($commitMessages as $message) {
-                $commitMessagesArray[] = $message ?: 'empty commit';
-            }
+        $commitMessagesArray = $this->getCommitMessages($startOfDayCommit, $endOfDayCommit);
+        if (count($commitMessagesArray) > 0) {
+            $this->output("Commit Messages", 4, 2);
+            $this->output($commitMessagesArray, 0, 2);
         }
+        $filesChanged = $this->getFilesChanged($startOfDayCommit, $endOfDayCommit);
+
+
 
         // Loop through the file types and process changes
         foreach ($this->fileTypes as $fileType) {
-            $numberOfChanges = $this->extractChangesForFileType($diffOutput, $fileType['extension'], $fileType['type']);
-            $hasChanges = $hasChanges || $numberOfChanges > 0;
-            $noOfChanges += $numberOfChanges;
+            $fileTypeChanges = 0;
+            foreach ($filesChanged as $key => $fileChanged) {
+                if (preg_match('/'.$fileType['extension'].'$/', $fileChanged)) {
+                    $this->output($fileChanged, 0, 2);
+                    unset($filesChanged[$key]);  // Remove the found file from the array
+                    $fileTypeChanges += $this->extractChangesForFileName($diffOutput, $fileChanged);
+                    $hasChanges = $hasChanges || $fileTypeChanges > 0;
+                }
+            }
+            if ($fileTypeChanges > 0) {
+                $this->output('Total changes for '.$fileType['type'] . ': ' . $fileTypeChanges, 4, 2);
+            }
+            $noOfChanges += $fileTypeChanges;
         }
 
         // If no changes in any file types, skip output for this repository
@@ -266,13 +280,8 @@ class GitDiffAnalyser
             return 0;
         }
 
-
         // Display total changes and estimated time
         $this->outputEffort($repo, $noOfChanges, 3, 3);
-        if (count($commitMessagesArray) > 0) {
-            $this->output("Commit Messages", 4, 2);
-            $this->output($commitMessagesArray, 0, 2);
-        }
 
         return $noOfChanges;
     }
@@ -345,9 +354,9 @@ class GitDiffAnalyser
     /**
      * Helper function to extract and list the number of changes for each file type.
      */
-    protected function extractChangesForFileType(string $diffOutput, string $filePattern, string $fileType): int
+    protected function extractChangesForFileName(string $diffOutput, string $fileName): int
     {
-        preg_match_all('#diff --git a/(.*' . $filePattern . ')#', $diffOutput, $matches);
+        preg_match_all('#diff --git a/(' . preg_quote($fileName, '#') . ')#', $diffOutput, $matches);
         $files = $matches[1];
         $totalChanges = 0;
         $data = [];
@@ -364,7 +373,6 @@ class GitDiffAnalyser
                 // Calculate total changes for this file
                 $fileChanges = $linesAdded + $linesRemoved;
                 if ($fileChanges > 0) {
-                    $hasChanges = true;
                     $totalChanges += $fileChanges;
 
                     // Print the result in the desired format
@@ -373,11 +381,10 @@ class GitDiffAnalyser
             }
         }
         if ($totalChanges > 0) {
-            $this->output("$fileType Files: $totalChanges changes", 4, 2);
+            $this->output("$fileName: $totalChanges changes", 5, 2);
             $this->output($data, 0, 3);
             if ($this->showFullDiff) {
-                $this->output("DIFF FOR $fileType", 5, 0);
-                $this->output($this->showFirst100AddedLinesFromString($diffOutput), 0, 0);
+                $this->output($this->extractDiffInfo($diffOutput), 0, 0);
             }
         }
         return $totalChanges;
@@ -402,6 +409,15 @@ class GitDiffAnalyser
         $commitMessages = array_filter(array_map('trim', explode("".PHP_EOL, $commitLog)));
         return array_unique($commitMessages);
     }
+    /**
+     * Fetch the commit messages for a given day.
+     */
+    protected function getFilesChanged(string $startOfDayCommit, string $endOfDayCommit): array
+    {
+        $commitLog = shell_exec("git diff --name-only $startOfDayCommit $endOfDayCommit");
+        $filesChanged = array_filter(array_map('trim', explode("".PHP_EOL, $commitLog)));
+        return array_unique($filesChanged);
+    }
 
     protected function changeDir(string $dir): void
     {
@@ -415,12 +431,11 @@ class GitDiffAnalyser
     {
         // Convert total changes to time in minutes and hours
         $timeInMinutes = $this->instantiationCostInMinutes;
-        // 10% less for each additional change
-        $initialMinutes = $this->minutesForFirstLineChange;
 
         for ($i = 0; $i < $numberOfChanges; $i++) {
-            $timeInMinutes += $initialMinutes * pow($this->decreaseFactor, $i);
+            $timeInMinutes += $this->minutesForFirstLineChange * pow($this->decreaseFactor, $i);
         }
+
         $hours = floor($timeInMinutes / 60);
         $minutes = round($timeInMinutes % 60);
         if ($hours > 0) {
@@ -428,6 +443,8 @@ class GitDiffAnalyser
         } else {
             $time = "$minutes minutes";
         }
+        $name = str_replace($this->directory, './', $name);
+        $name = str_replace('//', '/', $name);
         $this->output(
             "Changes for $name:",
             $headerLevel,
@@ -503,12 +520,18 @@ class GitDiffAnalyser
                 echo "--------------------------------------------------------------".PHP_EOL;
                 break;
             case 4:
+                if ($isStart) {
+                    echo PHP_EOL;
+                }
                 echo "===";
                 if (! $isStart) {
                     echo PHP_EOL;
                 }
                 break;
             case 5:
+                if ($isStart) {
+                    echo PHP_EOL;
+                }
                 echo "---";
                 if (! $isStart) {
                     echo PHP_EOL;
@@ -521,25 +544,79 @@ class GitDiffAnalyser
     }
 
 
-    protected function showFirst100AddedLinesFromString(string $diffContent): string
+    protected function extractDiffInfo(string $diffContent): string
     {
         $lines = explode("\n", $diffContent); // Split the string into lines
-        $lineCount = 0;
-        $string = '';
-        foreach ($lines as $line) {
-            // Check if the line starts with a '+'
-            if (strpos($line, '+') === 0) {
-                $string .= $line . PHP_EOL;
-                $lineCount++;
-
-                // Stop after the first 100 lines that start with '+'
-                if ($lineCount >= 100) {
-                    break;
+        $lineCount = count($lines);
+        $string = 'Total line changes: '.$lineCount.PHP_EOL;
+        if ($lineCount < $this->maxLinesToShowAll) {
+            return $diffContent;
+        }
+        if ($lineCount < $this->maxLinesToShowAdditionsOnly) {
+            $string .= "Showing additions only".PHP_EOL;
+            foreach ($lines as $line) {
+                // Check if the line starts with a '+'
+                if (strpos($line, '+') === 0) {
+                    $string .= $line . PHP_EOL;
                 }
             }
+            return $string;
+        } else {
+            return implode("\n", $this->cleanDiffContent($diffContent));
         }
-        return $string;
     }
+
+    protected function cleanDiffContent(string $diffContent): array
+    {
+        // List of typical coding words to remove
+        $codingWords = [
+            // Control structures
+            'if', 'else', 'elseif', 'endif', 'then', 'for', 'foreach', 'while', 'do',
+            'switch', 'case', 'break', 'continue', 'default', 'return', 'yield', 'throw', 'try', 'catch', 'finally', 'goto',
+
+            // Functions and classes
+            'function', 'class', 'abstract', 'interface', 'trait', 'public', 'private', 'protected', 'static', 'final',
+            'extends', 'implements', 'new', 'clone', 'self', 'parent', 'this', 'namespace', 'use', 'global', 'const', 'var', 'static',
+
+            // Data types
+            'int', 'float', 'string', 'bool', 'boolean', 'array', 'object', 'resource', 'null', 'void', 'mixed', 'iterable', 'callable',
+
+            // PHP specific
+            'echo', 'print', 'include', 'include_once', 'require', 'require_once', 'construct', 'destruct', 'call', 'get',
+            'set', 'isset', 'unset', 'toString', 'invoke', 'clone', 'debugInfo',
+
+            // JavaScript specific
+            'let', 'const', 'var', 'await', 'async', 'function', 'return', 'class', 'constructor', 'import', 'export',
+
+            // Miscellaneous
+            'true', 'false', 'null', 'undefined', 'NaN', 'Infinity', 'typeof', 'instanceof', 'in', 'as', 'with', 'extends', 'super', 'delete',
+        ];
+
+        // Remove all non-alpha characters and replace them with a space
+        $diffContent = preg_replace('/[^a-zA-Z\s]/', ' ', $diffContent);
+
+        // Replace multiple white spaces with a single space
+        $diffContent = preg_replace('/\s+/', ' ', $diffContent);
+
+        // Convert the string to an array of words
+        $words = explode(' ', trim($diffContent));
+
+        // Filter out coding words, make all words lowercase, and remove words shorter than 3 characters
+        $filteredWords = array_filter($words, function ($word) use ($codingWords) {
+            return !in_array(strtolower($word), $codingWords) && strlen($word) >= 3;
+        });
+
+        // Count word occurrences
+        $wordCounts = array_count_values(array_map('strtolower', $filteredWords));
+
+        // Sort words by frequency, from most used to least used
+        arsort($wordCounts);
+
+        // Get the top 20 words (keys only)
+        return array_keys(array_slice($wordCounts, 0, $this->maxNumberOfKeywords, true));
+
+    }
+
 
 
 }
