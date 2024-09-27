@@ -1,5 +1,5 @@
-Use
+Install into your php project, using composer, and type:
 
 ```shell
-sake-git-diff-analyser -h
+vendor/bin/sake-git-diff-analyser -h
 ```
