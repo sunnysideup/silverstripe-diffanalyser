@@ -83,7 +83,7 @@ if ($date) {
 }
 
 // Create an instance of the GitDiffAnalyzer and run the analysis
-$analyzer = (new GitDiffAnalyser())
+(new GitDiffAnalyser())
     ->setDirectory($directory)
     ->setDaysOrDate($daysOrDate)
     ->setBranch($branch)

@@ -241,21 +241,16 @@ class GitDiffAnalyser
             return strlen($line) < 1000;
         }));
 
-
-        // If no changes are found
-        if (empty($diffOutput)) {
-            return 0; // Skip if no changes are found
-        }
-
-        $hasChanges = false;
-
-        $commitMessagesArray = $this->getCommitMessages($startOfDayCommit, $endOfDayCommit);
-        if (count($commitMessagesArray) > 0) {
-            $this->output("Commit Messages", 4, 2);
-            $this->output($commitMessagesArray, 0, 2);
-        }
         $filesChanged = $this->getFilesChanged($startOfDayCommit, $endOfDayCommit);
+        $commitMessagesArray = $this->getCommitMessages($startOfDayCommit, $endOfDayCommit);
+        if (count($filesChanged) > 0 || count($commitMessagesArray) > 0) {
+            $this->output('Total files changes for : '.$repo .': '. count($filesChanged), 2, 2);
+        } else {
+            return 0;
+        }
 
+        $this->output("Commit Messages", 4, 2);
+        $this->output($commitMessagesArray, 0, 2);
 
 
         // Loop through the file types and process changes
@@ -266,7 +261,6 @@ class GitDiffAnalyser
                     $this->output($fileChanged, 0, 2);
                     unset($filesChanged[$key]);  // Remove the found file from the array
                     $fileTypeChanges += $this->extractChangesForFileName($diffOutput, $fileChanged);
-                    $hasChanges = $hasChanges || $fileTypeChanges > 0;
                 }
             }
             if ($fileTypeChanges > 0) {
@@ -276,9 +270,6 @@ class GitDiffAnalyser
         }
 
         // If no changes in any file types, skip output for this repository
-        if (!$hasChanges) {
-            return 0;
-        }
 
         // Display total changes and estimated time
         $this->outputEffort($repo, $noOfChanges, 3, 3);
