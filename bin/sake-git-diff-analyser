@@ -13,7 +13,7 @@ use Sunnysideup\DiffAnalyser\GitDiffAnalyser;
 // Usage information
 if (in_array('--help', $argv) || in_array('-h', $argv)) {
     echo <<<EOL
-Usage: php git-diff-analyser [--days=1] [--branch=develop] [--filter=sunnysideup] [--date=YYYY-MM-DD] [--minutes-for-first-line=1] [--mysetting=blue] [directory]
+Usage: sake-git-diff-analyser [--days=1] [--branch=develop] [--filter=sunnysideup] [--date=YYYY-MM-DD] [--minutes-for-first-line=1] [--mysetting=blue] [directory]
 
 Options:
   --days=N                     Number of days to go back in time for the analysis (default: 1).
@@ -32,8 +32,8 @@ Options:
   directory                    Directory to run the analysis in (default: current directory).
 
 Examples:
-  sake-git-diff-analyser --days=7 --branch=main --filter=myorganization ./myrepo
-  sake-git-diff-analyser  -vvv ./
+  vendor/bin/sake-git-diff-analyser --days=7 --branch=main --filter=myorganization ./myrepo
+  vendor/bin/sake-git-diff-analyser  -vvv ./
 
 EOL;
     exit;
