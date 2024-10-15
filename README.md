@@ -1,4 +1,7 @@
+
 # Git commit diff analyser
+
+Also see: <https://github.com/sunnysideup/silverstripe-easy-coding-standards>
 
 [![Build Status](https://travis-ci.org/sunnysideup/diffanalyser.svg?branch=master)](https://travis-ci.org/sunnysideup/diffanalyser)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/sunnysideup/diffanalyser/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/sunnysideup/diffanalyser/?branch=master)
