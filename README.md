@@ -9,7 +9,7 @@
 [![License](https://poser.pugx.org/sunnysideup/diffanalyser/license)](https://packagist.org/packages/sunnysideup/diffanalyser)
 [![Monthly Downloads](https://poser.pugx.org/sunnysideup/diffanalyser/d/monthly)](https://packagist.org/packages/sunnysideup/diffanalyser)
 
-## no longer being developed
+## no longer being developed here
 
 This package is now being maintained here: [easy coding standards](https://github.com/sunnysideup/silverstripe-easy-coding-standards)
 
