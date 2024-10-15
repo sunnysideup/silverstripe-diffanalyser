@@ -12,7 +12,7 @@
 ## no longer being developed here
 
 This package is now being maintained here: [easy coding standards](https://github.com/sunnysideup/silverstripe-easy-coding-standards).
-This is an awesome tool to get more productive.
+This is an awesome tool to get more productive from the command line, using sake commands. 
 
 ## Documentation
 
