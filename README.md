@@ -11,7 +11,7 @@
 
 ## no longer being developed
 
-now being updated on: <https://github.com/sunnysideup/silverstripe-easy-coding-standards>
+This package is now being here: <https://github.com/sunnysideup/silverstripe-easy-coding-standards>
 
 ## Documentation
 
