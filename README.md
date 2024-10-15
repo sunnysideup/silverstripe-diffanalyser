@@ -1,8 +1,6 @@
 
 # Git commit diff analyser
 
-Also see: <https://github.com/sunnysideup/silverstripe-easy-coding-standards>
-
 [![Build Status](https://travis-ci.org/sunnysideup/diffanalyser.svg?branch=master)](https://travis-ci.org/sunnysideup/diffanalyser)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/sunnysideup/diffanalyser/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/sunnysideup/diffanalyser/?branch=master)
 [![codecov.io](https://codecov.io/github/sunnysideup/diffanalyser/coverage.svg?branch=master)](https://codecov.io/github/sunnysideup/diffanalyser?branch=master)
@@ -10,6 +8,10 @@ Also see: <https://github.com/sunnysideup/silverstripe-easy-coding-standards>
 [![Latest Stable Version](https://poser.pugx.org/sunnysideup/diffanalyser/version)](https://packagist.org/packages/sunnysideup/diffanalyser)
 [![License](https://poser.pugx.org/sunnysideup/diffanalyser/license)](https://packagist.org/packages/sunnysideup/diffanalyser)
 [![Monthly Downloads](https://poser.pugx.org/sunnysideup/diffanalyser/d/monthly)](https://packagist.org/packages/sunnysideup/diffanalyser)
+
+## no longer being developed
+
+now being updated on: <https://github.com/sunnysideup/silverstripe-easy-coding-standards>
 
 ## Documentation
 
